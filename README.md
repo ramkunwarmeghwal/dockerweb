@@ -1,3 +1,4 @@
+# AWS Provider
 provider "aws" {
   region     = "ap-south-1"
   profile   = "myvimal"
@@ -8,7 +9,7 @@ variable "enter_ur_key_name" {
           default = "mykey1111"
 }
 
-
+## creation of vpc(virtual private computing)
 resource "aws_vpc" "main" {
   cidr_block       = "10.0.0.0/16"
   instance_tenancy = "default"
@@ -18,6 +19,7 @@ resource "aws_vpc" "main" {
   }
 }
 
+## internet gateway for excess public world
 resource "aws_internet_gateway" "gw" {
   vpc_id = "${aws_vpc.main.id}"
   tags = {
@@ -29,7 +31,7 @@ resource "aws_internet_gateway" "gw" {
 
 
 
-# #/*public subnet*/
+## public subnet
 resource "aws_subnet" "subnet_1" {
   vpc_id     = "${aws_vpc.main.id}"
   cidr_block = "10.0.1.0/24"
@@ -63,7 +65,7 @@ resource "aws_route_table_association" "eu-west-1a-public" {
 
 
 
-## /*private subnet*/
+##  private subnet 
 
 resource "aws_subnet" "subnet_2" {
   vpc_id     = "${aws_vpc.main.id}"
@@ -76,7 +78,7 @@ resource "aws_subnet" "subnet_2" {
 }
 
 
-## /*this security group for public/webserver*/
+## this security group for public/webserver 
 
 
 
@@ -139,7 +141,7 @@ resource "aws_security_group" "nat" {
 }
 
 
-
+## launchaing instance 
 resource "aws_instance"  "myin" {
   ami           = "ami-07a8c73a650069cf3"
   instance_type = "t2.micro"
@@ -154,7 +156,7 @@ resource "aws_instance"  "myin" {
 } 
 
 
-
+## access for public world allocate public ip
 resource "aws_eip" "Public_webos_ip" {
     instance = "${aws_instance.myin.id}"
     vpc = true
@@ -164,7 +166,7 @@ resource "aws_eip" "Public_webos_ip" {
 
 
 
- ## /* this security group for myaql_server*/
+ ##  this security group for myaql_server
 
  resource "aws_security_group" "web" {
     name = "vpc_web"
@@ -220,7 +222,7 @@ resource "aws_eip" "Public_mysql_ip" {
     depends_on = ["aws_nat_gateway.nat_gw"]
 }
 
-
+## NAT gateway for going to outside world for mysql instance
 resource "aws_nat_gateway" "nat_gw" {
   allocation_id = "aws_eip.Public_mysql_ip.id"
   subnet_id     = "${aws_subnet.subnet_1.id}"
@@ -230,9 +232,7 @@ resource "aws_nat_gateway" "nat_gw" {
 }
 
 
-
-
-
+## Route table 
 resource "aws_route_table" "route_for_mysql" {
     vpc_id = "${aws_vpc.main.id}"
      
@@ -243,7 +243,7 @@ resource "aws_route_table" "route_for_mysql" {
     }
 }
 
-
+## route table association
 resource "aws_route_table_association" "a" {
   subnet_id      = "${aws_subnet.subnet_2.id}"
   route_table_id = aws_route_table.route_for_mysql.id
