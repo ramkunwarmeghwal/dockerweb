@@ -29,7 +29,7 @@ resource "aws_internet_gateway" "gw" {
 
 
 
-/*public subnet*/
+# #/*public subnet*/
 resource "aws_subnet" "subnet_1" {
   vpc_id     = "${aws_vpc.main.id}"
   cidr_block = "10.0.1.0/24"
@@ -63,7 +63,7 @@ resource "aws_route_table_association" "eu-west-1a-public" {
 
 
 
-/*private subnet*/
+## /*private subnet*/
 
 resource "aws_subnet" "subnet_2" {
   vpc_id     = "${aws_vpc.main.id}"
@@ -76,7 +76,7 @@ resource "aws_subnet" "subnet_2" {
 }
 
 
-/*this security group for public/webserver*/
+## /*this security group for public/webserver*/
 
 
 
@@ -154,17 +154,17 @@ resource "aws_instance"  "myin" {
 } 
 
 
-/*
+
 resource "aws_eip" "Public_webos_ip" {
     instance = "${aws_instance.myin.id}"
     vpc = true
 }
 
-*/
 
 
 
-/* this security group for myaql_server*/
+
+ ## /* this security group for myaql_server*/
 
  resource "aws_security_group" "web" {
     name = "vpc_web"
@@ -209,15 +209,15 @@ resource "aws_instance"  "myin12" {
   tags = {
     Name = "mysql"
   }
-  # depends_on = ["aws_nat_gateway.nat_gw"]
+   depends_on = ["aws_nat_gateway.nat_gw"]
 } 
 
 
-/*
+
 resource "aws_eip" "Public_mysql_ip" {
     instance = "aws_instance.myin12.id"
     vpc = true
-   # depends_on = ["aws_nat_gateway.nat_gw"]
+    depends_on = ["aws_nat_gateway.nat_gw"]
 }
 
 
@@ -229,7 +229,7 @@ resource "aws_nat_gateway" "nat_gw" {
   }
 }
 
-*/
+
 
 
 
@@ -239,7 +239,7 @@ resource "aws_route_table" "route_for_mysql" {
     route {
         cidr_block = "0.0.0.0/0"
         gateway_id = "${aws_internet_gateway.gw.id}"
-        #nat_gateway_id = "aws_nat_gateway.nat_gw.id"
+        nat_gateway_id = "aws_nat_gateway.nat_gw.id"
     }
 }
 
